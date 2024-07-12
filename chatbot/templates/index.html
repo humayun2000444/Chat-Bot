@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Chatbot</h1>
+        <div id="chat-box">
+            <div id="chat-log">
+                {% for log in chat_logs %}
+                    <p><strong>User:</strong> {{ log[2] }}</p>
+                    <p><strong>Bot:</strong> {{ log[3] }}</p>
+                    <hr>
+                {% endfor %}
+            </div>
+            <div class="input-box">
+                <input type="text" id="user-input" placeholder="Type a message..." onkeypress="checkEnter(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const chatLog = document.getElementById('chat-log');
+                chatLog.innerHTML += `<p><strong>User:</strong> ${userInput}</p>`;
+                chatLog.innerHTML += `<p><strong>Bot:</strong> ${data.message}</p><hr>`;
+                document.getElementById('user-input').value = '';
+                chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll to bottom
+            });
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
